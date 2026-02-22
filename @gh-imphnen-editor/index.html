@@ -1,0 +1,2536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="theme-color" content="#0f1014"/>
+<title>Imphnened</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Geist+Mono:wght@100..900&family=Geist:wght@100..900&family=Inter+Tight:ital,wght@0,100..900;1,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Lilita+One&display=swap" rel="stylesheet">
+<style>
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TOKENS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+:root {
+  --bg:       #0f1014;
+  --bg1:      #15171c;
+  --bg2:      #1c1f26;
+  --bg3:      #23262f;
+  --line:     #2a2d38;
+  --line2:    #383c4a;
+
+  --t0:       #eceef5;
+  --t1:       #9499aa;
+  --t2:       #555a6a;
+  --t3:       #333640;
+
+  --acc:      #8dbbff;    /* mint green — the one memorable accent */
+  --acc2:     #a5b4fc;    /* soft violet for secondary */
+  --warn:     #fbbf24;
+  --err:      #f87171;
+
+  --mono:     'JetBrains Mono', monospace;
+  --serif:    'Fraunces', Georgia, serif;
+
+  --bar:      44px;
+  --sat:      env(safe-area-inset-top,    0px);
+  --sab:      env(safe-area-inset-bottom, 0px);
+  --sal:      env(safe-area-inset-left,   0px);
+  --sar:      env(safe-area-inset-right,  0px);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; height: 100dvh; }
+body {
+  height: 100%;
+  height: 100dvh;
+  background: var(--bg);
+  color: var(--t0);
+  font-family: var(--mono);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SHELL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  height: 100dvh;
+  padding-top: var(--sat);
+  padding-bottom: var(--sab);
+  padding-left: var(--sal);
+  padding-right: var(--sar);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TOPBAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#topbar {
+  display: flex;
+  align-items: center;
+  height: var(--bar);
+  padding: 0 12px;
+  background: var(--bg1);
+  border-bottom: 1px solid var(--line);
+  gap: 8px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 20;
+}
+
+.logo {
+  font-family: 'Lilita One';
+  font-weight: 300;
+  font-size: 20px;
+  color: var(--acc);
+  letter-spacing: -.02em;
+  flex-shrink: 0;
+  user-select: none;
+  line-height: 1;
+  padding-right: 4px;
+}
+
+#titleInput {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--t1);
+  caret-color: var(--acc);
+  padding: 0 4px;
+}
+#titleInput::placeholder { color: var(--t3); }
+#titleInput:focus { color: var(--t0); }
+
+/* icon button */
+.ib {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: var(--t2);
+  cursor: pointer;
+  transition: background .12s, color .12s;
+  flex-shrink: 0;
+}
+.ib:hover  { background: var(--bg2); color: var(--t1); }
+.ib:active { background: var(--bg3); color: var(--t0); }
+.ib.on     { color: var(--acc); }
+.ib svg    { display: block; pointer-events: none; }
+
+/* saved pill */
+#savedPill {
+  font-size: 9.5px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  color: var(--t2);
+  flex-shrink: 0;
+  transition: all .25s;
+  user-select: none;
+  white-space: nowrap;
+}
+#savedPill.dirty {
+  color: var(--warn);
+  border-color: rgba(251,191,36,.2);
+  background: rgba(251,191,36,.06);
+}
+#savedPill.saved {
+  color: var(--acc);
+  border-color: rgba(110,231,183,.2);
+  background: rgba(110,231,183,.06);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   QUICK TOOLBAR (collapsible)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#qtbar {
+  display: flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 10px;
+  background: var(--bg1);
+  border-bottom: 1px solid var(--line);
+  gap: 2px;
+  flex-shrink: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  transition: height .18s, opacity .18s;
+}
+#qtbar::-webkit-scrollbar { display: none; }
+#qtbar.hidden { height: 0; opacity: 0; pointer-events: none; overflow: hidden; }
+
+.qt {
+  display: flex; align-items: center; gap: 4px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 5px;
+  background: transparent;
+  border: none;
+  color: var(--t2);
+  font-family: var(--mono);
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background .1s, color .1s;
+}
+.qt:hover  { background: var(--bg2); color: var(--t1); }
+.qt:active { background: var(--bg3); color: var(--t0); }
+.qt.on { color: var(--acc); background: rgba(110,231,183,.07); }
+.qt svg { flex-shrink: 0; }
+
+.qt-sep {
+  width: 1px; height: 18px;
+  background: var(--line2);
+  flex-shrink: 0;
+  margin: 0 2px;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   EDITOR VIEWPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#editorWrap {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+#editorMount {
+  width: 100%;
+  height: 100%;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   FIND BAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#findbar {
+  position: absolute;
+  top: 8px; right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg2);
+  border: 1px solid var(--line2);
+  border-radius: 8px;
+  padding: 5px 8px;
+  box-shadow: 0 4px 24px rgba(0,0,0,.5);
+  z-index: 50;
+  transform: translateY(-6px) scale(.97);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform .16s, opacity .16s;
+}
+#findbar.open {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#findInput {
+  width: 180px;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--t0);
+  caret-color: var(--acc);
+}
+#findInput::placeholder { color: var(--t3); }
+
+#findCount {
+  font-size: 10px;
+  color: var(--t2);
+  white-space: nowrap;
+  min-width: 36px;
+}
+
+.find-nav {
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 4px;
+  background: transparent;
+  border: none;
+  color: var(--t2);
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.find-nav:hover { background: var(--bg3); color: var(--t0); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   STATUS BAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#statusbar {
+  display: flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 12px;
+  background: var(--bg1);
+  border-top: 1px solid var(--line);
+  gap: 14px;
+  flex-shrink: 0;
+  font-size: 10px;
+  color: var(--t2);
+  user-select: none;
+  overflow: hidden;
+}
+
+.sb { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+.sb b { color: var(--t1); font-weight: 400; }
+.sb-r { margin-left: auto; display: flex; gap: 14px; align-items: center; }
+
+#sbVirt {
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: rgba(110,231,183,.08);
+  color: var(--acc);
+  border: 1px solid rgba(110,231,183,.15);
+  transition: opacity .2s;
+}
+#sbVirt.off { opacity: .35; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   WORD WRAP OVERRIDE
+   CVM lines are position:absolute white-space:pre
+   we just add a class to the scroll container
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#editorMount.wrap .cvm-scroll { overflow-x: hidden; }
+#editorMount.wrap .cvm-line   { white-space: pre-wrap !important; word-break: break-all; right: 0; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CVM STYLE PATCHES (injected via styleTag)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TOAST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#toast {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 56px);
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  border-radius: 20px;
+  padding: 7px 16px;
+  font-size: 11.5px;
+  color: var(--t1);
+  opacity: 0;
+  transition: opacity .16s, transform .16s;
+  pointer-events: none;
+  z-index: 999;
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0,0,0,.5);
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MOBILE KEYBOARD TOOLBAR
+   Extra row of keys shown on mobile above keyboard
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#kbrow {
+  display: none;
+  align-items: center;
+  height: 40px;
+  background: var(--bg1);
+  border-top: 1px solid var(--line);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  flex-shrink: 0;
+  gap: 0;
+  padding: 0 6px;
+  z-index: 30;
+}
+#kbrow::-webkit-scrollbar { display: none; }
+#kbrow.visible { display: flex; }
+
+.kbkey {
+  height: 30px;
+  padding: 0 13px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 5px;
+  background: transparent;
+  border: none;
+  color: var(--t1);
+  font-family: var(--mono);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background .08s;
+}
+.kbkey:active { background: var(--bg3); color: var(--t0); }
+.kbkey.wide { font-size: 11px; color: var(--t2); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   PAGE LOAD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#shell { animation: fadein .25s ease-out; }
+@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+</style>
+</head>
+<body>
+
+<div id="shell">
+
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <div class="logo">Imphnened</div>
+
+    <input id="titleInput" placeholder="untitled" maxlength="80" autocomplete="off" spellcheck="false"/>
+
+    <div id="savedPill">—</div>
+
+    <!-- find -->
+    <button class="ib" id="btnFind" title="Find  Ctrl+F" onclick="toggleFind()">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+        <circle cx="6.5" cy="6.5" r="4" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M10 10L13 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+    </button>
+
+    <!-- toolbar toggle -->
+    <button class="ib" id="btnQT" title="Toolbar" onclick="toggleQtbar()">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+        <rect x="2" y="3.5" width="11" height="1.5" rx=".75" fill="currentColor"/>
+        <rect x="2" y="6.75" width="11" height="1.5" rx=".75" fill="currentColor"/>
+        <rect x="2" y="10" width="7" height="1.5" rx=".75" fill="currentColor"/>
+      </svg>
+    </button>
+
+    <!-- new / clear -->
+    <button class="ib" id="btnNew" title="New  Ctrl+N" onclick="newDoc()">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+        <path d="M7.5 3v9M3 7.5h9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- QUICK TOOLBAR -->
+  <div id="qtbar">
+    <!-- text ops -->
+    <button class="qt" onclick="ins('\t')" title="Tab">⇥ tab</button>
+    <button class="qt" onclick="ins('  ')" title="2 spaces">·· sp</button>
+
+    <div class="qt-sep"></div>
+
+    <!-- brackets -->
+    <button class="qt" onclick="wrap('(',')')">( )</button>
+    <button class="qt" onclick="wrap('[',']')">[ ]</button>
+    <button class="qt" onclick="wrap('{','}')">{ }</button>
+    <button class="qt" onclick="wrap('`','`')">`  `</button>
+    <button class="qt" onclick="wrap('&quot;','&quot;')">" "</button>
+    <button class="qt" onclick="wrap(&quot;'&quot;,&quot;'&quot;)">' '</button>
+
+    <div class="qt-sep"></div>
+
+    <!-- symbols -->
+    <button class="qt" onclick="ins('=>')">=></button>
+    <button class="qt" onclick="ins('...')"  >...</button>
+    <button class="qt" onclick="ins('===')"  >===</button>
+    <button class="qt" onclick="ins('!==')"  >!==</button>
+    <button class="qt" onclick="ins(' && ')" >&&</button>
+    <button class="qt" onclick="ins(' || ')" >||</button>
+    <button class="qt" onclick="ins(' ?? ')" >??</button>
+
+    <div class="qt-sep"></div>
+
+    <!-- toggles -->
+    <button class="qt on" id="qtHL"  onclick="toggleHL()" >
+      <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+        <path d="M1 9L5.5 1.5 10 9H1Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+        <path d="M3 6.5h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      HL
+    </button>
+    <button class="qt" id="qtLN"  onclick="toggleLN()" >
+      <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+        <path d="M4 2.5h5M4 5.5h5M4 8.5h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        <path d="M1.5 3.5v-.8l.7-.7M1.5 7h1.3l-1.3 1.7h1.3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      #
+    </button>
+    <button class="qt" id="qtWrap" onclick="toggleWrap()">
+      <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+        <path d="M1 2.5h9M1 5.5h5.5a2 2 0 1 1 0 4H5l1.5 1.5M5 9.5l1.5-1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      wrap
+    </button>
+    <button class="qt" onclick="copyAll()">
+      <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+        <rect x="3.5" y="1.5" width="6" height="7.5" rx="1" stroke="currentColor" stroke-width="1.2"/>
+        <path d="M1.5 3.5v6a1 1 0 0 0 1 1h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      copy
+    </button>
+  </div>
+
+  <!-- EDITOR VIEWPORT -->
+  <div id="editorWrap">
+    <div id="editorMount"></div>
+
+    <!-- FIND BAR (floating inside editor) -->
+    <div id="findbar">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="color:var(--t2);flex-shrink:0">
+        <circle cx="5.5" cy="5.5" r="3.5" stroke="currentColor" stroke-width="1.3"/>
+        <path d="M8.5 8.5L11 11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+      <input id="findInput" placeholder="find…" autocomplete="off" spellcheck="false"
+             oninput="doFind()" onkeydown="findKey(event)"/>
+      <span id="findCount">—</span>
+      <button class="find-nav" onclick="findStep(-1)" title="Prev">↑</button>
+      <button class="find-nav" onclick="findStep(1)"  title="Next">↓</button>
+      <button class="find-nav" onclick="closeFind()"  title="Close">×</button>
+    </div>
+  </div>
+
+  <!-- MOBILE KEYBOARD EXTRA ROW -->
+  <div id="kbrow">
+    <button class="kbkey" onclick="ins('\t')">⇥</button>
+    <button class="kbkey" onclick="ins('{')">  {  </button>
+    <button class="kbkey" onclick="ins('}')">  }  </button>
+    <button class="kbkey" onclick="ins('(')">  (  </button>
+    <button class="kbkey" onclick="ins(')')">  )  </button>
+    <button class="kbkey" onclick="ins('[')">  [  </button>
+    <button class="kbkey" onclick="ins(']')">  ]  </button>
+    <button class="kbkey" onclick="ins(';')">  ;  </button>
+    <button class="kbkey" onclick="ins(':')">  :  </button>
+    <button class="kbkey" onclick="ins('=')">  =  </button>
+    <button class="kbkey" onclick="ins('=>')">=></button>
+    <button class="kbkey" onclick="ins('...')" >…</button>
+    <button class="kbkey" onclick="ins(' && ')" >&&</button>
+    <button class="kbkey" onclick="ins(' || ')" >||</button>
+    <button class="kbkey" onclick="editorInst && editorInst._ta.focus()">↩ done</button>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div id="statusbar">
+    <span class="sb">Ln <b id="sbLn">1</b></span>
+    <span class="sb">Col <b id="sbCol">1</b></span>
+    <span class="sb"><b id="sbLines">0</b> ln</span>
+    <span class="sb"><b id="sbChars">0</b> ch</span>
+    <span class="sb"><b id="sbWords">0</b> wd</span>
+    <div class="sb-r">
+      <span id="sbVirt">VIRT</span>
+      <span class="sb" id="sbMode" style="color:var(--t2)">js</span>
+    </div>
+  </div>
+
+</div><!-- /shell -->
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ══════════════════════════════════════════
+     CODEVIEWMANAGER ENGINE
+══════════════════════════════════════════ -->
+<script>
+/**
+ * ╔══════════════════════════════════════════════════════════════╗
+ * ║              CodeViewManager v2.0                           ║
+ * ║  Agnostic · Virtualizing · Hot-Update · Mobile-Friendly     ║
+ * ║                                                              ║
+ * ║  Architecture:                                               ║
+ * ║  - Hidden <textarea> as single source of truth              ║
+ * ║  - Absolute-positioned <div> per line                       ║
+ * ║  - Virtual DOM: only visible lines rendered                 ║
+ * ║  - Hot update: dirty-line diffing, RAF-batched              ║
+ * ║  - Selection: virtualization suspended during selection     ║
+ * ║  - Highlight & Interactive ranges via character offsets     ║
+ * ╚══════════════════════════════════════════════════════════════╝
+ */
+
+;(function (global, factory) {
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = factory();
+  } else {
+    global.CodeViewManager = factory();
+  }
+})(typeof window !== 'undefined' ? window : this, function () {
+  'use strict';
+
+  // ─────────────────────────────────────────
+  //  CONSTANTS & DEFAULTS
+  // ─────────────────────────────────────────
+  const DEFAULTS = {
+    lineHeight:          22,       // px per line
+    fontSize:            13.5,     // px
+    fontFamily:          '"JetBrains Mono", "Fira Code", "Cascadia Code", monospace',
+    tabSize:             2,
+    paddingLeft:         16,       // content area left padding
+    paddingTop:          4,
+    overscanLines:       8,        // extra lines rendered outside viewport
+    virtualThreshold:   40,        // enable virtualizing above this line count
+    caretBlinkMs:       530,
+    longPressMs:        500,
+    showLineNumbers:     true,
+    lineNumberMinWidth:  44,
+    lineNumberPadRight:  12,
+    theme: {
+      bg:               '#0d1117',
+      bgGutter:         '#0a0e14',
+      bgActiveLine:     '#161b22',
+      bgSelection:      'rgba(56,139,253,0.25)',
+      borderGutter:     '#1e2430',
+      textColor:        '#c9d1d9',
+      gutterColor:      '#3d444d',
+      gutterActiveColor:'#8b949e',
+      caretColor:       '#58a6ff',
+      scrollbarThumb:   '#21262d',
+      scrollbarTrack:   'transparent',
+    },
+  };
+
+  // ─────────────────────────────────────────
+  //  UTILITY HELPERS
+  // ─────────────────────────────────────────
+
+  /** Escape HTML entities */
+  function esc(str) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /** Clamp a number between min and max */
+  function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
+
+  /** RAF-throttled callback */
+  function rafThrottle(fn) {
+    let pending = false;
+    return function (...args) {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(() => { pending = false; fn.apply(this, args); });
+    };
+  }
+
+  /** Measure monospace char width accurately */
+  function measureCharWidth(fontFamily, fontSize) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.font = `${fontSize}px ${fontFamily}`;
+    return ctx.measureText('M').width;
+  }
+
+  /** Deep merge objects */
+  function deepMerge(target, source) {
+    const out = Object.assign({}, target);
+    if (source && typeof source === 'object') {
+      for (const key of Object.keys(source)) {
+        if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+          out[key] = deepMerge(target[key] || {}, source[key]);
+        } else {
+          out[key] = source[key];
+        }
+      }
+    }
+    return out;
+  }
+
+  /** Convert absolute character offset → { line, col } */
+  function offsetToLineCol(lines, offset) {
+    let rem = offset;
+    for (let i = 0; i < lines.length; i++) {
+      const len = lines[i].length;
+      if (rem <= len) return { line: i, col: rem };
+      rem -= len + 1; // +1 for \n
+    }
+    const last = lines.length - 1;
+    return { line: last, col: lines[last] ? lines[last].length : 0 };
+  }
+
+  /** Convert { line, col } → absolute character offset */
+  function lineColToOffset(lines, line, col) {
+    let offset = 0;
+    const l = clamp(line, 0, lines.length - 1);
+    for (let i = 0; i < l; i++) offset += lines[i].length + 1;
+    return offset + clamp(col, 0, (lines[l] || '').length);
+  }
+
+  // ─────────────────────────────────────────
+  //  RANGE PAINTER
+  //  Converts highlight/interactive arrays
+  //  into per-character annotation maps for
+  //  efficient HTML generation.
+  // ─────────────────────────────────────────
+
+  class RangePainter {
+    constructor() {
+      this._highlights   = [];
+      this._interactives = [];
+    }
+
+    setHighlights(arr)   { this._highlights   = arr || []; }
+    setInteractives(arr) { this._interactives = arr || []; }
+
+    /**
+     * Given a line's absolute start offset and its text,
+     * build annotated HTML with highlight spans and interactive tokens.
+     *
+     * @param {string} lineText
+     * @param {number} lineStart  absolute offset of first char
+     * @returns {string}          innerHTML
+     */
+    buildLineHTML(lineText, lineStart) {
+      const len = lineText.length;
+      if (len === 0) return '\u200b'; // zero-width space keeps line height
+
+      const lineEnd = lineStart + len;
+
+      // ── Collect all boundary positions within this line ──
+      const boundaries = new Set([0, len]);
+
+      const applicableHL = [];
+      for (const hl of this._highlights) {
+        const s = Math.max(0, hl.from - lineStart);
+        const e = Math.min(len, hl.to - lineStart);
+        if (s < e) { boundaries.add(s); boundaries.add(e); applicableHL.push(hl); }
+      }
+
+      const applicableIV = [];
+      for (const iv of this._interactives) {
+        const s = Math.max(0, iv.from - lineStart);
+        const e = Math.min(len, iv.to - lineStart);
+        if (s < e) { boundaries.add(s); boundaries.add(e); applicableIV.push(iv); }
+      }
+
+      const sorted = [...boundaries].sort((a, b) => a - b);
+      let html = '';
+
+      for (let bi = 0; bi < sorted.length - 1; bi++) {
+        const segStart = sorted[bi];
+        const segEnd   = sorted[bi + 1];
+        const absStart = lineStart + segStart;
+        const absEnd   = lineStart + segEnd;
+        const chunk    = lineText.slice(segStart, segEnd);
+
+        // Find best matching highlight for this segment
+        let color = null, extraStyle = null;
+        for (const hl of applicableHL) {
+          if (hl.from <= absStart && hl.to >= absEnd) {
+            if (hl.color) color = hl.color;
+            if (hl.style) extraStyle = hl.style;
+          }
+        }
+
+        // Find matching interactive for this segment
+        let iv = null;
+        for (const candidate of applicableIV) {
+          if (candidate.from <= absStart && candidate.to >= absEnd) {
+            iv = candidate; break;
+          }
+        }
+
+        const escaped = esc(chunk);
+
+        if (!color && !extraStyle && !iv) {
+          html += escaped;
+          continue;
+        }
+
+        let styleAttr = '';
+        if (color) styleAttr += `color:${color};`;
+        if (extraStyle) styleAttr += extraStyle;
+
+        if (iv) {
+          const dataAttrs = `data-iv-from="${iv.from}" data-iv-to="${iv.to}"`;
+          html += `<span class="cvm-iv" style="${styleAttr}" ${dataAttrs}>${escaped}</span>`;
+        } else {
+          html += `<span style="${styleAttr}">${escaped}</span>`;
+        }
+      }
+
+      return html;
+    }
+  }
+
+  // ─────────────────────────────────────────
+  //  SELECTION OVERLAY MANAGER
+  //  Draws selection highlight rectangles
+  //  across potentially non-contiguous
+  //  absolute-positioned line divs.
+  // ─────────────────────────────────────────
+
+  class SelectionOverlay {
+    constructor(spacerEl, opts) {
+      this._spacer = spacerEl;
+      this._opts   = opts;
+      this._overlays = []; // active overlay elements
+    }
+
+    clear() {
+      for (const el of this._overlays) el.remove();
+      this._overlays = [];
+    }
+
+    /**
+     * Draw selection overlays for range [start, end) (absolute offsets).
+     * charWidth is needed to position start/end within a line.
+     */
+    draw(lines, selStart, selEnd, charWidth) {
+      this.clear();
+      if (selStart === selEnd) return;
+
+      const [ss, se] = selStart < selEnd ? [selStart, selEnd] : [selEnd, selStart];
+      const startLC = offsetToLineCol(lines, ss);
+      const endLC   = offsetToLineCol(lines, se);
+      const LH      = this._opts.lineHeight;
+      const PL      = this._opts.paddingLeft;
+
+      for (let li = startLC.line; li <= endLC.line; li++) {
+        const lineText = lines[li] || '';
+        const colStart = li === startLC.line ? startLC.col : 0;
+        const colEnd   = li === endLC.line   ? endLC.col   : lineText.length;
+
+        const left  = PL + colStart * charWidth;
+        const width = li === endLC.line
+          ? (colEnd - colStart) * charWidth
+          : (lineText.length - colStart) * charWidth + charWidth * 2; // extend past EOL
+
+        const ov = document.createElement('div');
+        ov.className = 'cvm-sel-overlay';
+        ov.style.cssText = [
+          `position:absolute`,
+          `top:${li * LH + this._opts.paddingTop}px`,
+          `left:${Math.max(PL, left)}px`,
+          `width:${Math.max(charWidth, width)}px`,
+          `height:${LH}px`,
+          `background:${this._opts.theme.bgSelection}`,
+          `pointer-events:none`,
+          `z-index:1`,
+        ].join(';');
+
+        this._spacer.appendChild(ov);
+        this._overlays.push(ov);
+      }
+    }
+  }
+
+  // ─────────────────────────────────────────
+  //  CARET MANAGER
+  // ─────────────────────────────────────────
+
+  class CaretManager {
+    constructor(spacerEl, opts) {
+      this._opts = opts;
+      this._el = document.createElement('div');
+      this._el.className = 'cvm-caret';
+      this._el.style.cssText = [
+        'position:absolute',
+        'width:2px',
+        `height:${opts.lineHeight}px`,
+        `background:${opts.theme.caretColor}`,
+        'z-index:10',
+        'pointer-events:none',
+        'will-change:transform',
+        'border-radius:1px',
+      ].join(';');
+      spacerEl.appendChild(this._el);
+      this._visible = false;
+      this._blinkTimer = null;
+    }
+
+    show(lineIdx, col, charWidth) {
+      const LH = this._opts.lineHeight;
+      const PL = this._opts.paddingLeft;
+      const PT = this._opts.paddingTop;
+      const x  = PL + col * charWidth;
+      const y  = lineIdx * LH + PT;
+      this._el.style.transform = `translate(${x}px, ${y}px)`;
+      this._el.style.opacity   = '1';
+      this._el.style.display   = '';
+      this._restartBlink();
+    }
+
+    hide() {
+      this._el.style.display = 'none';
+      clearInterval(this._blinkTimer);
+    }
+
+    _restartBlink() {
+      clearInterval(this._blinkTimer);
+      this._el.style.opacity = '1';
+      this._blinkTimer = setInterval(() => {
+        this._el.style.opacity = this._el.style.opacity === '0' ? '1' : '0';
+      }, this._opts.caretBlinkMs);
+    }
+
+    destroy() {
+      clearInterval(this._blinkTimer);
+      this._el.remove();
+    }
+  }
+
+  // ─────────────────────────────────────────
+  //  VIRTUAL RENDERER
+  //  Core engine: manages the pool of line
+  //  <div> elements, recycles them, and
+  //  hot-patches only dirty lines.
+  // ─────────────────────────────────────────
+
+  class VirtualRenderer {
+    constructor(scrollEl, gutterEl, opts, painter) {
+      this._scroll  = scrollEl;
+      this._gutter  = gutterEl;
+      this._opts    = opts;
+      this._painter = painter;
+
+      // The spacer holds all absolutely-positioned line divs
+      this._spacer = document.createElement('div');
+      this._spacer.className = 'cvm-spacer';
+      this._spacer.style.cssText = 'position:relative;';
+      this._scroll.appendChild(this._spacer);
+
+      this._linePool   = new Map(); // lineIdx → { content: div, gutter: div }
+      this._dirtySet   = new Set();
+      this._lines      = [];
+      this._virtualizing = false;
+      this._visRange   = { start: 0, end: 0 };
+
+      // Sub-managers
+      this._selection = new SelectionOverlay(this._spacer, opts);
+      this._caret     = new CaretManager(this._spacer, opts);
+
+      // Cached char width
+      this._charWidth = measureCharWidth(opts.fontFamily, opts.fontSize);
+    }
+
+    get spacer()     { return this._spacer; }
+    get charWidth()  { return this._charWidth; }
+    get selection()  { return this._selection; }
+    get caret()      { return this._caret; }
+
+    // ── API ──────────────────────────
+
+    setLines(lines, forceFull) {
+      if (forceFull) {
+        this._markAllDirty(lines);
+      } else {
+        // Diff against existing
+        const max = Math.max(this._lines.length, lines.length);
+        for (let i = 0; i < max; i++) {
+          if (this._lines[i] !== lines[i]) this._dirtySet.add(i);
+        }
+      }
+      this._lines = lines;
+      this._updateSpacer();
+    }
+
+    markAllDirty() { this._markAllDirty(this._lines); }
+
+    _markAllDirty(lines) {
+      for (let i = 0; i < lines.length; i++) this._dirtySet.add(i);
+    }
+
+    setVirtualizing(v) { this._virtualizing = v; }
+
+    /**
+     * Main render call — called on scroll, resize, or dirty.
+     * Calculates visible range, recycles out-of-range nodes,
+     * creates/updates in-range nodes.
+     */
+    render(activeLine) {
+      const lines  = this._lines;
+      const total  = lines.length;
+      const LH     = this._opts.lineHeight;
+      const PT     = this._opts.paddingTop;
+      const ov     = this._opts.overscanLines;
+
+      let visStart, visEnd;
+
+      if (!this._virtualizing || total <= this._opts.virtualThreshold) {
+        visStart = 0;
+        visEnd   = total - 1;
+      } else {
+        const scrollTop = this._scroll.scrollTop;
+        const viewH     = this._scroll.clientHeight;
+        visStart = Math.max(0,        Math.floor(scrollTop / LH) - ov);
+        visEnd   = Math.min(total-1,  Math.ceil((scrollTop + viewH) / LH) + ov);
+      }
+
+      this._visRange = { start: visStart, end: visEnd };
+
+      // ── Recycle out-of-range lines ──
+      for (const [idx, nodes] of this._linePool) {
+        if (idx < visStart || idx > visEnd) {
+          nodes.content.remove();
+          if (nodes.gutter) nodes.gutter.remove();
+          this._linePool.delete(idx);
+        }
+      }
+
+      // ── Create / update in-range lines ──
+      for (let i = visStart; i <= visEnd; i++) {
+        const isDirty = this._dirtySet.has(i);
+        const exists  = this._linePool.has(i);
+
+        if (!exists) {
+          this._createLineNode(i, activeLine, lines);
+        } else if (isDirty) {
+          this._updateLineNode(i, activeLine, lines);
+        } else {
+          // Still update active-line class
+          const n = this._linePool.get(i);
+          n.content.classList.toggle('cvm-line--active', i === activeLine);
+          if (n.gutter) n.gutter.classList.toggle('cvm-gn--active', i === activeLine);
+        }
+      }
+
+      this._dirtySet.clear();
+    }
+
+    _createLineNode(idx, activeLine, lines) {
+      const LH  = this._opts.lineHeight;
+      const PT  = this._opts.paddingTop;
+      const top = idx * LH + PT;
+
+      // Content line
+      const content = document.createElement('div');
+      content.className = 'cvm-line';
+      content.style.cssText = [
+        'position:absolute',
+        `top:${top}px`,
+        'left:0', 'right:0',
+        `height:${LH}px`,
+        `line-height:${LH}px`,
+        `font-size:${this._opts.fontSize}px`,
+        `font-family:${this._opts.fontFamily}`,
+        `padding-left:${this._opts.paddingLeft}px`,
+        `color:${this._opts.theme.textColor}`,
+        'white-space:pre',
+        'z-index:2',
+        'pointer-events:none', // interactive spans handle their own events
+      ].join(';');
+
+      const lineStart = this._lineStartOffset(idx);
+      content.innerHTML = this._painter.buildLineHTML(lines[idx] || '', lineStart);
+
+      if (idx === activeLine) content.classList.add('cvm-line--active');
+      this._spacer.appendChild(content);
+      this._attachInteractiveListeners(content);
+
+      // Gutter
+      let gutter = null;
+      if (this._opts.showLineNumbers) {
+        gutter = this._createGutterNode(idx, top, activeLine);
+      }
+
+      this._linePool.set(idx, { content, gutter });
+    }
+
+    _updateLineNode(idx, activeLine, lines) {
+      const n = this._linePool.get(idx);
+      if (!n) { this._createLineNode(idx, activeLine, lines); return; }
+
+      const lineStart = this._lineStartOffset(idx);
+      n.content.innerHTML = this._painter.buildLineHTML(lines[idx] || '', lineStart);
+      n.content.classList.toggle('cvm-line--active', idx === activeLine);
+
+      this._attachInteractiveListeners(n.content);
+
+      if (n.gutter) {
+        n.gutter.classList.toggle('cvm-gn--active', idx === activeLine);
+      } else if (this._opts.showLineNumbers) {
+        // gutter wasn't created before — make it now
+        const top = idx * this._opts.lineHeight + this._opts.paddingTop;
+        n.gutter = this._createGutterNode(idx, top, activeLine);
+        this._linePool.get(idx).gutter = n.gutter;
+      }
+    }
+
+    _createGutterNode(idx, top, activeLine) {
+      const LH = this._opts.lineHeight;
+      const g  = document.createElement('div');
+      g.className = 'cvm-gutter-num';
+      g.textContent = idx + 1;
+      g.style.cssText = [
+        'position:absolute',
+        `top:${top}px`,
+        'left:0', 'right:0',
+        `height:${LH}px`,
+        `line-height:${LH}px`,
+        `font-size:${this._opts.fontSize * 0.86}px`,
+        `font-family:${this._opts.fontFamily}`,
+        `color:${idx === activeLine ? this._opts.theme.gutterActiveColor : this._opts.theme.gutterColor}`,
+        `text-align:right`,
+        `padding-right:${this._opts.lineNumberPadRight}px`,
+        'user-select:none',
+        '-webkit-user-select:none',
+      ].join(';');
+
+      if (idx === activeLine) g.classList.add('cvm-gn--active');
+      this._gutter.appendChild(g);
+      return g;
+    }
+
+    _attachInteractiveListeners(lineEl) {
+      // Remove old listeners by replacing element's interactive spans
+      lineEl.querySelectorAll('.cvm-iv').forEach(span => {
+        const from = parseInt(span.dataset.ivFrom, 10);
+        const to   = parseInt(span.dataset.ivTo, 10);
+        span.style.cursor = 'pointer';
+        span.style.pointerEvents = 'auto';
+        span.style.textDecoration = 'underline';
+        span.style.textDecorationStyle = 'dotted';
+        span.style.textDecorationColor = 'currentColor';
+        // Interactive listener is attached via the painter's data attrs;
+        // the actual event delegation is done on the spacer.
+      });
+    }
+
+    /** Remove all rendered line nodes */
+    clear() {
+      for (const [, nodes] of this._linePool) {
+        nodes.content.remove();
+        if (nodes.gutter) nodes.gutter.remove();
+      }
+      this._linePool.clear();
+    }
+
+    /** Rebuild gutter numbers after show/hide toggle */
+    rebuildGutter() {
+      for (const [idx, nodes] of this._linePool) {
+        if (nodes.gutter) { nodes.gutter.remove(); nodes.gutter = null; }
+        if (this._opts.showLineNumbers) {
+          const top = idx * this._opts.lineHeight + this._opts.paddingTop;
+          nodes.gutter = this._createGutterNode(idx, top, -1);
+        }
+      }
+    }
+
+    _lineStartOffset(lineIdx) {
+      const lines = this._lines;
+      let offset = 0;
+      for (let i = 0; i < lineIdx && i < lines.length; i++) {
+        offset += lines[i].length + 1; // +1 for \n
+      }
+      return offset;
+    }
+
+    _updateSpacer() {
+      const totalH = this._lines.length * this._opts.lineHeight
+                   + this._opts.paddingTop * 2;
+      this._spacer.style.height = totalH + 'px';
+      this._gutter.style.height = totalH + 'px';
+    }
+
+    updateCharWidth() {
+      this._charWidth = measureCharWidth(this._opts.fontFamily, this._opts.fontSize);
+    }
+
+    destroy() {
+      this._caret.destroy();
+      this._selection.clear();
+      this.clear();
+      this._spacer.remove();
+    }
+  }
+
+  // ─────────────────────────────────────────
+  //  MAIN CLASS: CodeViewManager
+  // ─────────────────────────────────────────
+
+  class CodeViewManager {
+    /**
+     * @param {HTMLElement|string} container  Mount point
+     * @param {object}             options    Override DEFAULTS
+     */
+    constructor(container, options = {}) {
+      this._root = typeof container === 'string'
+        ? document.querySelector(container)
+        : container;
+
+      if (!this._root) throw new Error('CodeViewManager: invalid container');
+
+      // Merge options
+      this._opts = deepMerge(DEFAULTS, options);
+
+      // Internal state
+      this._lines      = [''];
+      this._highlights  = [];
+      this._interactives = [];
+      this._eventMap   = {};
+      this._activeLine = 0;
+      this._selStart   = 0;
+      this._selEnd     = 0;
+      this._isSelecting = false;
+      this._longPressTimer = null;
+      this._destroyed  = false;
+
+      // Build DOM
+      this._buildDOM();
+
+      // Initialize subsystems
+      this._painter   = new RangePainter();
+      this._renderer  = new VirtualRenderer(
+        this._scrollEl,
+        this._gutterEl,
+        this._opts,
+        this._painter
+      );
+
+      // Bind events
+      this._bindEvents();
+
+      // Initial render
+      this._renderer.setLines(this._lines, true);
+      this._updateVirtualMode();
+      this._scheduleRender();
+    }
+
+    // ══════════════════════════════════════
+    //  DOM CONSTRUCTION
+    // ══════════════════════════════════════
+
+    _buildDOM() {
+      const o = this._opts;
+      this._root.style.cssText = `
+        position:relative;
+        overflow:hidden;
+        background:${o.theme.bg};
+        display:flex;
+        flex-direction:row;
+        box-sizing:border-box;
+      `;
+
+      // ── Gutter (line numbers) ──
+      this._gutterEl = document.createElement('div');
+      this._gutterEl.className = 'cvm-gutter';
+      this._gutterEl.style.cssText = `
+        position:relative;
+        flex-shrink:0;
+        width:${o.showLineNumbers ? o.lineNumberMinWidth : 0}px;
+        background:${o.theme.bgGutter};
+        border-right:1px solid ${o.theme.borderGutter};
+        overflow:hidden;
+        transition:width .15s;
+        z-index:5;
+      `;
+
+      // ── Content scroll wrapper ──
+      this._scrollEl = document.createElement('div');
+      this._scrollEl.className = 'cvm-scroll';
+      this._scrollEl.style.cssText = `
+        flex:1;
+        overflow:auto;
+        position:relative;
+        cursor:text;
+        scrollbar-width:thin;
+        scrollbar-color:${o.theme.scrollbarThumb} ${o.theme.scrollbarTrack};
+      `;
+
+      // Hidden textarea — source of truth
+      this._ta = document.createElement('textarea');
+      this._ta.className = 'cvm-textarea';
+      this._ta.setAttribute('autocomplete', 'off');
+      this._ta.setAttribute('autocorrect',  'off');
+      this._ta.setAttribute('autocapitalize', 'off');
+      this._ta.setAttribute('spellcheck',   'false');
+      this._ta.style.cssText = `
+        position:fixed;
+        top:-9999px; left:-9999px;
+        width:1px; height:1px;
+        opacity:0;
+        pointer-events:none;
+        resize:none;
+        border:none;
+        outline:none;
+        padding:0;
+        font-family:${o.fontFamily};
+        font-size:${o.fontSize}px;
+        tab-size:${o.tabSize};
+        white-space:pre;
+      `;
+
+      // ── Scroll resize helper (prevents scroll jumps on iOS) ──
+      this._scrollAnchor = document.createElement('div');
+      this._scrollAnchor.style.cssText = 'height:1px;width:1px;pointer-events:none;';
+
+      this._root.appendChild(this._gutterEl);
+      this._root.appendChild(this._scrollEl);
+      this._root.appendChild(this._ta);
+
+      // Apply webkit scrollbar styles
+      const styleTag = document.createElement('style');
+      styleTag.textContent = `
+        .cvm-scroll::-webkit-scrollbar { width:8px; height:8px; }
+        .cvm-scroll::-webkit-scrollbar-track { background:${o.theme.scrollbarTrack}; }
+        .cvm-scroll::-webkit-scrollbar-thumb { background:${o.theme.scrollbarThumb}; border-radius:4px; }
+        .cvm-scroll::-webkit-scrollbar-corner { background:${o.theme.bg}; }
+        .cvm-line--active { background:${o.theme.bgActiveLine}; }
+        .cvm-iv { cursor:pointer !important; pointer-events:auto !important; }
+        .cvm-iv:hover { filter:brightness(1.3); }
+      `;
+      document.head.appendChild(styleTag);
+      this._styleTag = styleTag;
+    }
+
+    // ══════════════════════════════════════
+    //  EVENT BINDING
+    // ══════════════════════════════════════
+
+    _bindEvents() {
+      const ta     = this._ta;
+      const scroll = this._scrollEl;
+
+      // ── Textarea events ──
+      ta.addEventListener('input',   () => this._onTAInput());
+      ta.addEventListener('keydown', (e) => this._onKeydown(e));
+      ta.addEventListener('keyup',   () => this._syncCaret());
+      ta.addEventListener('focus',   () => this._onFocus());
+      ta.addEventListener('blur',    () => this._onBlur());
+
+      // Selection change (covers mouse, keyboard, programmatic)
+      document.addEventListener('selectionchange', () => {
+        if (document.activeElement === ta) this._onSelectionChange();
+      });
+
+      // ── Mouse interaction on scroll area ──
+      scroll.addEventListener('mousedown', (e) => this._onMouseDown(e));
+      scroll.addEventListener('mouseup',   (e) => this._onMouseUp(e));
+      scroll.addEventListener('click',     (e) => this._onMouseClick(e));
+      scroll.addEventListener('dblclick',  (e) => this._onDblClick(e));
+
+      // ── Touch interaction ──
+      scroll.addEventListener('touchstart', (e) => this._onTouchStart(e), { passive: false });
+      scroll.addEventListener('touchend',   (e) => this._onTouchEnd(e),   { passive: true  });
+      scroll.addEventListener('touchmove',  (e) => this._onTouchMove(e),  { passive: true  });
+
+      // ── Scroll virtualization ──
+      this._onScroll = rafThrottle(() => this._scheduleRender());
+      scroll.addEventListener('scroll', this._onScroll, { passive: true });
+
+      // ── Resize ──
+      if (typeof ResizeObserver !== 'undefined') {
+        this._resizeObserver = new ResizeObserver(() => {
+          this._renderer.updateCharWidth();
+          this._scheduleRender();
+        });
+        this._resizeObserver.observe(this._root);
+      }
+
+      // ── Event delegation for interactive tokens ──
+      const spacer = this._renderer.spacer;
+      spacer.addEventListener('click',       (e) => this._onIVEvent(e, 'click'));
+      spacer.addEventListener('contextmenu', (e) => this._onIVEvent(e, 'contextmenu'));
+    }
+
+    // ══════════════════════════════════════
+    //  INPUT HANDLING
+    // ══════════════════════════════════════
+
+    _onTAInput() {
+      const val   = this._ta.value;
+      const newLines = val === '' ? [''] : val.split('\n');
+      // Hot diff — only mark lines that changed
+      const maxLen = Math.max(this._lines.length, newLines.length);
+      for (let i = 0; i < maxLen; i++) {
+        if (this._lines[i] !== newLines[i]) this._renderer._dirtySet.add(i);
+      }
+      this._lines = newLines;
+      this._renderer.setLines(this._lines, false);
+      this._updateVirtualMode();
+      this._syncCaret();
+      this._scheduleRender();
+      this._emit('change', { value: val, lines: newLines.slice() });
+      this._emit('input',  { value: val });
+    }
+
+    _onKeydown(e) {
+      // Tab → insert spaces (not focus-jump)
+      if (e.key === 'Tab' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        const ta  = this._ta;
+        const s   = ta.selectionStart;
+        const end = ta.selectionEnd;
+        const sp  = ' '.repeat(this._opts.tabSize);
+
+        if (s === end) {
+          // Simple insert
+          const v = ta.value;
+          ta.value = v.slice(0, s) + sp + v.slice(end);
+          ta.setSelectionRange(s + this._opts.tabSize, s + this._opts.tabSize);
+        } else {
+          // Indent selection block
+          const v   = ta.value;
+          const pre = v.slice(0, s);
+          const sel = v.slice(s, end);
+          const post = v.slice(end);
+          const indented = sel.replace(/^/gm, sp);
+          ta.value = pre + indented + post;
+          ta.setSelectionRange(s, s + indented.length);
+        }
+        this._onTAInput();
+      }
+
+      this._emit('keydown', e);
+      // Schedule caret sync after key is processed
+      setTimeout(() => this._syncCaret(), 0);
+    }
+
+    // ══════════════════════════════════════
+    //  SELECTION & CARET SYNC
+    // ══════════════════════════════════════
+
+    _onSelectionChange() {
+      const ta = this._ta;
+      const ss = ta.selectionStart;
+      const se = ta.selectionEnd;
+
+      const hadSel  = this._selStart !== this._selEnd;
+      const hasSel  = ss !== se;
+      this._selStart = ss;
+      this._selEnd   = se;
+
+      // Toggle virtualization when selection state changes
+      if (hasSel && !this._isSelecting) {
+        this._isSelecting = true;
+        this._setVirtualizing(false);
+        this._renderer.render(this._activeLine);
+      } else if (!hasSel && this._isSelecting) {
+        this._isSelecting = false;
+        this._updateVirtualMode();
+      }
+
+      this._syncCaret();
+
+      if (hasSel) {
+        this._renderer.selection.draw(
+          this._lines,
+          ss, se,
+          this._renderer.charWidth
+        );
+      } else {
+        this._renderer.selection.clear();
+      }
+    }
+
+    _syncCaret() {
+      const ta     = this._ta;
+      const offset = ta.selectionEnd;
+      const lc     = offsetToLineCol(this._lines, offset);
+      this._activeLine = lc.line;
+      this._renderer.caret.show(lc.line, lc.col, this._renderer.charWidth);
+      this._ensureCaretVisible(lc.line, lc.col);
+      this._emit('cursorMove', { line: lc.line, col: lc.col, offset });
+    }
+
+    _ensureCaretVisible(line, col) {
+      const LH   = this._opts.lineHeight;
+      const PT   = this._opts.paddingTop;
+      const PL   = this._opts.paddingLeft;
+      const CW   = this._renderer.charWidth;
+      const top  = line * LH + PT;
+      const left = PL + col * CW;
+      const el   = this._scrollEl;
+
+      if (top < el.scrollTop) {
+        el.scrollTop = top - PT;
+      } else if (top + LH > el.scrollTop + el.clientHeight) {
+        el.scrollTop = top + LH - el.clientHeight + LH;
+      }
+
+      if (left < el.scrollLeft) {
+        el.scrollLeft = Math.max(0, left - 50);
+      } else if (left + CW > el.scrollLeft + el.clientWidth) {
+        el.scrollLeft = left + CW - el.clientWidth + 50;
+      }
+    }
+
+    // ══════════════════════════════════════
+    //  MOUSE EVENTS
+    // ══════════════════════════════════════
+
+    _posFromMouse(clientX, clientY) {
+      const rect = this._scrollEl.getBoundingClientRect();
+      const sl   = this._scrollEl.scrollLeft;
+      const st   = this._scrollEl.scrollTop;
+      const LH   = this._opts.lineHeight;
+      const PT   = this._opts.paddingTop;
+      const PL   = this._opts.paddingLeft;
+      const CW   = this._renderer.charWidth;
+
+      const relY = clientY - rect.top  + st - PT;
+      const relX = clientX - rect.left + sl - PL;
+
+      const line = clamp(Math.floor(relY / LH), 0, this._lines.length - 1);
+      const col  = clamp(Math.round(relX / CW), 0, (this._lines[line] || '').length);
+
+      return lineColToOffset(this._lines, line, col);
+    }
+
+    _onMouseDown(e) {
+      if (e.target.classList.contains('cvm-iv')) return; // handled by IV delegation
+      e.preventDefault();
+      this._ta.focus();
+      const pos = this._posFromMouse(e.clientX, e.clientY);
+      if (e.shiftKey) {
+        const anchor = Math.min(this._selStart, this._selEnd);
+        this._ta.setSelectionRange(anchor, pos);
+      } else {
+        this._ta.setSelectionRange(pos, pos);
+      }
+      this._onSelectionChange();
+    }
+
+    _onMouseUp()  { /* nothing extra needed */ }
+
+    _onMouseClick(e) {
+      if (e.target.classList.contains('cvm-iv')) return;
+    }
+
+    _onDblClick(e) {
+      // Select word under cursor
+      const pos    = this._posFromMouse(e.clientX, e.clientY);
+      const text   = this._ta.value;
+      const WORD   = /\w/;
+      let s = pos, end = pos;
+      while (s > 0 && WORD.test(text[s - 1])) s--;
+      while (end < text.length && WORD.test(text[end])) end++;
+      this._ta.setSelectionRange(s, end);
+      this._onSelectionChange();
+      this._emit('wordSelect', { from: s, to: end, text: text.slice(s, end) });
+    }
+
+    // ══════════════════════════════════════
+    //  TOUCH EVENTS  (mobile-friendly)
+    // ══════════════════════════════════════
+
+    _onTouchStart(e) {
+      if (e.touches.length !== 1) return;
+      const t = e.touches[0];
+      this._touchStartX = t.clientX;
+      this._touchStartY = t.clientY;
+      this._touchMoved  = false;
+      this._ta.focus();
+
+      this._longPressTimer = setTimeout(() => {
+        if (!this._touchMoved) {
+          const pos = this._posFromMouse(this._touchStartX, this._touchStartY);
+          const text = this._ta.value;
+          let s = pos, end = pos;
+          while (s > 0 && /\w/.test(text[s-1])) s--;
+          while (end < text.length && /\w/.test(text[end])) end++;
+          this._ta.setSelectionRange(s, end);
+          this._onSelectionChange();
+          this._emit('longPress', { x: this._touchStartX, y: this._touchStartY });
+        }
+      }, this._opts.longPressMs);
+    }
+
+    _onTouchMove(e) {
+      const t = e.touches[0];
+      const dx = Math.abs(t.clientX - this._touchStartX);
+      const dy = Math.abs(t.clientY - this._touchStartY);
+      if (dx > 5 || dy > 5) {
+        this._touchMoved = true;
+        clearTimeout(this._longPressTimer);
+      }
+    }
+
+    _onTouchEnd(e) {
+      clearTimeout(this._longPressTimer);
+      if (this._touchMoved) return;
+      if (e.changedTouches.length !== 1) return;
+      const t = e.changedTouches[0];
+      const pos = this._posFromMouse(t.clientX, t.clientY);
+      this._ta.setSelectionRange(pos, pos);
+      this._onSelectionChange();
+    }
+
+    _onFocus() {
+      this._renderer.caret.show(
+        this._activeLine,
+        offsetToLineCol(this._lines, this._ta.selectionEnd).col,
+        this._renderer.charWidth
+      );
+      this._emit('focus', {});
+    }
+
+    _onBlur() {
+      this._renderer.caret.hide();
+      this._emit('blur', {});
+    }
+
+    // ══════════════════════════════════════
+    //  INTERACTIVE TOKEN EVENTS
+    // ══════════════════════════════════════
+
+    _onIVEvent(e, eventType) {
+      const el = e.target.closest('.cvm-iv');
+      if (!el) return;
+
+      const from = parseInt(el.dataset.ivFrom, 10);
+      const to   = parseInt(el.dataset.ivTo,   10);
+
+      const candidates = this._interactives.filter(iv => {
+        const evType = iv.event || 'click';
+        return iv.from === from && iv.to === to && evType === eventType;
+      });
+
+      if (candidates.length === 0) return;
+
+      const text = this._ta.value.slice(from, to);
+      for (const iv of candidates) {
+        iv.fn({ from, to, text, originalEvent: e });
+      }
+
+      e.stopPropagation();
+      e.preventDefault();
+    }
+
+    // ══════════════════════════════════════
+    //  RENDER SCHEDULING
+    // ══════════════════════════════════════
+
+    _scheduleRender() {
+      if (this._renderPending || this._destroyed) return;
+      this._renderPending = true;
+      requestAnimationFrame(() => {
+        this._renderPending = false;
+        if (!this._destroyed) this._doRender();
+      });
+    }
+
+    _doRender() {
+      this._renderer.render(this._activeLine);
+      // Re-draw selection if active
+      if (this._selStart !== this._selEnd) {
+        this._renderer.selection.draw(
+          this._lines,
+          this._selStart, this._selEnd,
+          this._renderer.charWidth
+        );
+      }
+      this._updateGutterWidth();
+    }
+
+    _updateGutterWidth() {
+      if (!this._opts.showLineNumbers) return;
+      const digits  = String(this._lines.length).length;
+      const minW    = this._opts.lineNumberMinWidth;
+      const charW   = this._renderer.charWidth * 0.86; // gutter font is smaller
+      const needed  = Math.max(minW, digits * charW * 0.86 + this._opts.lineNumberPadRight + 12);
+      this._gutterEl.style.width = Math.ceil(needed) + 'px';
+    }
+
+    _setVirtualizing(v) {
+      this._renderer.setVirtualizing(v);
+      this._renderer.markAllDirty();
+    }
+
+    _updateVirtualMode() {
+      const v = !this._isSelecting && this._lines.length > this._opts.virtualThreshold;
+      this._renderer.setVirtualizing(v);
+    }
+
+    // ══════════════════════════════════════
+    //  EVENT EMITTER
+    // ══════════════════════════════════════
+
+    _emit(event, data) {
+      const handlers = this._eventMap[event];
+      if (!handlers) return;
+      for (const fn of handlers) {
+        try { fn(data); } catch (err) { console.error('CVM event error:', err); }
+      }
+    }
+
+    // ══════════════════════════════════════
+    //  ▓▓▓  PUBLIC API  ▓▓▓
+    // ══════════════════════════════════════
+
+    /**
+     * Register event listener.
+     * Events: 'change', 'input', 'keydown', 'focus', 'blur',
+     *         'cursorMove', 'wordSelect', 'longPress', 'scroll'
+     * @returns {CodeViewManager} this (chainable)
+     */
+    on(event, fn) {
+      if (!this._eventMap[event]) this._eventMap[event] = [];
+      this._eventMap[event].push(fn);
+      return this;
+    }
+
+    /** Remove a specific listener */
+    off(event, fn) {
+      if (!this._eventMap[event]) return this;
+      this._eventMap[event] = this._eventMap[event].filter(f => f !== fn);
+      return this;
+    }
+
+    /** Remove all listeners for an event */
+    offAll(event) {
+      delete this._eventMap[event];
+      return this;
+    }
+
+    // ─────────────────────────────────────
+    //  TEXT MANAGEMENT
+    // ─────────────────────────────────────
+
+    /**
+     * Replace entire editor content.
+     * @param {string} text
+     */
+    setText(text) {
+      const str = text == null ? '' : String(text);
+      this._ta.value = str;
+      this._lines = str === '' ? [''] : str.split('\n');
+      this._selStart = 0;
+      this._selEnd   = 0;
+      this._activeLine = 0;
+      this._isSelecting = false;
+      this._renderer.clear();
+      this._renderer.setLines(this._lines, true);
+      this._updateVirtualMode();
+      this._renderer.selection.clear();
+      this._renderer.caret.hide();
+      this._scheduleRender();
+      this._emit('change', { value: str, lines: this._lines.slice() });
+      return this;
+    }
+
+    /** Get current editor content */
+    getText() { return this._ta.value; }
+
+    /** Get array of line strings (readonly copy) */
+    getLines() { return this._lines.slice(); }
+
+    /**
+     * Insert or replace text at absolute character offset range.
+     * @param {object} opts
+     * @param {string} opts.text  Text to insert
+     * @param {number} [opts.from] Start offset (default: cursor position)
+     * @param {number} [opts.to]   End offset   (default: from)
+     */
+    addText({ text = '', from, to } = {}) {
+      const ta  = this._ta;
+      const val = ta.value;
+      const s   = from !== undefined ? clamp(from, 0, val.length) : ta.selectionStart;
+      const e   = to   !== undefined ? clamp(to,   0, val.length) : s;
+
+      const newVal = val.slice(0, s) + text + val.slice(e);
+      ta.value = newVal;
+      ta.setSelectionRange(s + text.length, s + text.length);
+      this._onTAInput();
+      return this;
+    }
+
+    /**
+     * Delete text in range [from, to).
+     */
+    deleteText({ from, to }) {
+      return this.addText({ text: '', from, to });
+    }
+
+    // ─────────────────────────────────────
+    //  HIGHLIGHT
+    // ─────────────────────────────────────
+
+    /**
+     * Apply syntax / semantic highlights.
+     * @param {Array<{from:number, to:number, color?:string, style?:string}>} arr
+     */
+    highlight(arr) {
+      this._highlights = arr || [];
+      this._painter.setHighlights(this._highlights);
+      this._renderer.markAllDirty();
+      this._scheduleRender();
+      return this;
+    }
+
+    /** Clear all highlights */
+    clearHighlights() { return this.highlight([]); }
+
+    // ─────────────────────────────────────
+    //  INTERACTIVE TOKENS
+    // ─────────────────────────────────────
+
+    /**
+     * Register interactive token ranges.
+     * @param {Array<{from:number, to:number, event?:string, fn:function}>} arr
+     *   event: 'click' | 'contextmenu' (default: 'click')
+     *   fn: ({from, to, text, originalEvent}) => void
+     */
+    interactive(arr) {
+      this._interactives = arr || [];
+      this._painter.setInteractives(this._interactives);
+      this._renderer.markAllDirty();
+      this._scheduleRender();
+      return this;
+    }
+
+    /** Clear all interactives */
+    clearInteractives() { return this.interactive([]); }
+
+    // ─────────────────────────────────────
+    //  LINE NUMBERS
+    // ─────────────────────────────────────
+
+    /**
+     * Show or hide line number gutter.
+     * @param {boolean} [enabled=true]
+     */
+    enableLineNumber(enabled = true) {
+      this._opts.showLineNumbers = enabled;
+      this._gutterEl.style.width = enabled ? this._opts.lineNumberMinWidth + 'px' : '0px';
+      this._gutterEl.style.borderRight = enabled
+        ? `1px solid ${this._opts.theme.borderGutter}`
+        : 'none';
+      this._renderer.rebuildGutter();
+      this._scheduleRender();
+      return this;
+    }
+
+    // ─────────────────────────────────────
+    //  CURSOR / SELECTION
+    // ─────────────────────────────────────
+
+    /**
+     * Get current cursor info.
+     * @returns {{ line:number, col:number, offset:number }}
+     */
+    getCursor() {
+      const offset = this._ta.selectionEnd;
+      const lc     = offsetToLineCol(this._lines, offset);
+      return { line: lc.line, col: lc.col, offset };
+    }
+
+    /**
+     * Move cursor to absolute offset (or {line,col}).
+     */
+    setCursor(posOrOffset) {
+      let offset;
+      if (typeof posOrOffset === 'number') {
+        offset = clamp(posOrOffset, 0, this._ta.value.length);
+      } else {
+        offset = lineColToOffset(this._lines, posOrOffset.line, posOrOffset.col);
+      }
+      this._ta.setSelectionRange(offset, offset);
+      this._syncCaret();
+      return this;
+    }
+
+    /**
+     * Get current selection.
+     * @returns {{ text:string, from:number, to:number, startLC:object, endLC:object }}
+     */
+    getSelection() {
+      const s = Math.min(this._selStart, this._selEnd);
+      const e = Math.max(this._selStart, this._selEnd);
+      return {
+        text: this._ta.value.slice(s, e),
+        from: s,
+        to:   e,
+        startLC: offsetToLineCol(this._lines, s),
+        endLC:   offsetToLineCol(this._lines, e),
+      };
+    }
+
+    /**
+     * Programmatically select a range.
+     */
+    setSelection(from, to) {
+      const len = this._ta.value.length;
+      this._ta.setSelectionRange(clamp(from, 0, len), clamp(to, 0, len));
+      this._onSelectionChange();
+      return this;
+    }
+
+    // ─────────────────────────────────────
+    //  SCROLLING
+    // ─────────────────────────────────────
+
+    /** Scroll to bring a line into view */
+    scrollToLine(lineIdx, position = 'center') {
+      const LH    = this._opts.lineHeight;
+      const PT    = this._opts.paddingTop;
+      const el    = this._scrollEl;
+      const lineTop = lineIdx * LH + PT;
+
+      let scrollTop;
+      if (position === 'top') {
+        scrollTop = lineTop;
+      } else if (position === 'bottom') {
+        scrollTop = lineTop - el.clientHeight + LH;
+      } else { // center
+        scrollTop = lineTop - el.clientHeight / 2 + LH / 2;
+      }
+      el.scrollTop = Math.max(0, scrollTop);
+      return this;
+    }
+
+    /** Scroll to an absolute character offset */
+    scrollToOffset(offset) {
+      const lc = offsetToLineCol(this._lines, offset);
+      return this.scrollToLine(lc.line, 'center');
+    }
+
+    // ─────────────────────────────────────
+    //  THEMING
+    // ─────────────────────────────────────
+
+    /**
+     * Update theme variables at runtime.
+     * @param {object} themePartial
+     */
+    setTheme(themePartial) {
+      this._opts.theme = Object.assign(this._opts.theme, themePartial);
+      this._root.style.background = this._opts.theme.bg;
+      this._gutterEl.style.background = this._opts.theme.bgGutter;
+      this._gutterEl.style.borderRight = `1px solid ${this._opts.theme.borderGutter}`;
+      this._renderer.markAllDirty();
+      this._scheduleRender();
+      return this;
+    }
+
+    // ─────────────────────────────────────
+    //  FOCUS
+    // ─────────────────────────────────────
+
+    /** Focus the editor */
+    focus() { this._ta.focus(); return this; }
+
+    /** Check if editor is focused */
+    hasFocus() { return document.activeElement === this._ta; }
+
+    // ─────────────────────────────────────
+    //  INFO
+    // ─────────────────────────────────────
+
+    getLineCount()   { return this._lines.length; }
+    getCharCount()   { return this._ta.value.length; }
+    isVirtualizing() { return this._renderer._virtualizing; }
+
+    /** Convert absolute offset to {line, col} */
+    offsetToPosition(offset) { return offsetToLineCol(this._lines, offset); }
+
+    /** Convert {line, col} to absolute offset */
+    positionToOffset(line, col) { return lineColToOffset(this._lines, line, col); }
+
+    // ─────────────────────────────────────
+    //  TEARDOWN
+    // ─────────────────────────────────────
+
+    /**
+     * Destroy the editor, clean up DOM and listeners.
+     */
+    destroy() {
+      this._destroyed = true;
+      if (this._resizeObserver) this._resizeObserver.disconnect();
+      this._renderer.destroy();
+      this._ta.remove();
+      this._styleTag.remove();
+      this._root.innerHTML = '';
+      this._eventMap = {};
+    }
+  }
+
+  // ─────────────────────────────────────────
+  //  EXPOSE UTILITIES ON CLASS
+  // ─────────────────────────────────────────
+  CodeViewManager.utils = { offsetToLineCol, lineColToOffset, measureCharWidth };
+
+  return CodeViewManager;
+});
+
+</script>
+
+<!-- ══════════════════════════════════════════
+     EDITOR APP
+══════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ────────────────────────────────────────
+   State
+──────────────────────────────────────── */
+let editorInst = null;
+let hlOn   = true;
+let lnOn   = true;
+let wrapOn = false;
+let qtOpen = true;
+let findOpen = false;
+let findMatches = [];
+let findIdx = -1;
+let saveTimer = null;
+let isDirty = false;
+
+const STORAGE = 'ed_doc';
+const STORAGE_TITLE = 'ed_title';
+
+/* ────────────────────────────────────────
+   Highlight palette
+──────────────────────────────────────── */
+const HL = {
+  keyword:  '#7eb8f7',   // blue
+  string:   '#86efac',   // green
+  comment:  '#4a5060',   // dim
+  number:   '#fcd34d',   // amber
+  cls:      '#6ee7b7',   // mint (accent)
+  fn:       '#c4b5fd',   // violet
+  op:       '#94a3b8',   // slate
+  tag:      '#f9a8d4',   // pink (html)
+  attr:     '#a5b4fc',   // indigo
+  punct:    '#64748b',
+};
+
+/* ────────────────────────────────────────
+   Init
+──────────────────────────────────────── */
+window.addEventListener('DOMContentLoaded', () => {
+  editorInst = new CodeViewManager('#editorMount', {
+    lineHeight:       22,
+    fontSize:         13.5,
+    fontFamily:       '"JetBrains Mono", "Fira Code", monospace',
+    tabSize:          2,
+    overscanLines:    8,
+    virtualThreshold: 40,
+    showLineNumbers:  true,
+    theme: {
+      bg:               '#0f1014',
+      bgGutter:         '#0b0d11',
+      bgActiveLine:     'rgba(110,231,183,0.04)',
+      bgSelection:      'rgba(110,231,183,0.15)',
+      borderGutter:     '#2a2d38',
+      textColor:        '#eceef5',
+      gutterColor:      '#33364040',
+      gutterActiveColor:'#9499aa',
+      caretColor:       '#6ee7b7',
+      scrollbarThumb:   '#2a2d38',
+      scrollbarTrack:   'transparent',
+    },
+  });
+
+  // restore saved content
+  const savedText  = localStorage.getItem(STORAGE) || WELCOME;
+  const savedTitle = localStorage.getItem(STORAGE_TITLE) || '';
+  editorInst.setText(savedText);
+  document.getElementById('titleInput').value = savedTitle;
+
+  // wire events
+  editorInst.on('change', ({ value }) => {
+    updateStats(value);
+    markDirty();
+    if (hlOn) applyHighlight(value);
+    if (findOpen) doFind();
+    updateVirt();
+  });
+
+  editorInst.on('cursorMove', ({ line, col }) => {
+    document.getElementById('sbLn').textContent  = line + 1;
+    document.getElementById('sbCol').textContent = col + 1;
+  });
+
+  editorInst.on('focus', () => {
+    if (isMobile()) showKbrow(true);
+  });
+  editorInst.on('blur', () => {
+    // small delay so kbrow buttons can fire first
+    setTimeout(() => { if (!editorInst.hasFocus()) showKbrow(false); }, 200);
+  });
+
+  // initial render
+  updateStats(savedText);
+  if (hlOn) applyHighlight(savedText);
+  updateVirt();
+
+  // title change → save
+  document.getElementById('titleInput').addEventListener('input', () => {
+    localStorage.setItem(STORAGE_TITLE, document.getElementById('titleInput').value);
+  });
+
+  // keyboard shortcuts
+  document.addEventListener('keydown', onGlobalKey);
+
+  // focus
+  editorInst.focus();
+});
+
+/* ────────────────────────────────────────
+   Welcome text
+──────────────────────────────────────── */
+const WELCOME = `
+IMPHNENEDITOR
+Kode index.html ini digenerate oleh Claude Sonnet 4.5.
+Perubahan yang dilakukan oleh prompter :
+-Pemberian nama IMPHNENED.
+-Merubah accent color jadi biru.
+Layout dan UI editor ini menggunakan
+Thouriver Editor yang juga dibuat 
+prompter menggunakan Claude Sonnet 
+4.6 di konversasi
+yang sama.
+
+
+catatan : Khusus pengguna device mobile
+yang ingin copy paste silakan gunakan
+menu edit teks pada keyboard kalian.
+`.trim();
+
+/* ────────────────────────────────────────
+   Stats
+──────────────────────────────────────── */
+function updateStats(text) {
+  const lines = text.split('\n').length;
+  const chars = text.length;
+  const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+  document.getElementById('sbLines').textContent = lines;
+  document.getElementById('sbChars').textContent = chars;
+  document.getElementById('sbWords').textContent = words;
+}
+
+function updateVirt() {
+  const v = editorInst && editorInst.isVirtualizing();
+  const el = document.getElementById('sbVirt');
+  el.classList.toggle('off', !v);
+  el.title = v ? 'Virtualizing ON' : 'Virtualizing OFF';
+}
+
+/* ────────────────────────────────────────
+   Dirty / save
+──────────────────────────────────────── */
+function markDirty() {
+  isDirty = true;
+  setSavedPill('dirty', '● unsaved');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(autosave, 1200);
+}
+
+function autosave() {
+  if (!editorInst) return;
+  localStorage.setItem(STORAGE, editorInst.getText());
+  isDirty = false;
+  setSavedPill('saved', '✓ saved');
+  setTimeout(() => setSavedPill('', '—'), 2000);
+}
+
+function setSavedPill(cls, text) {
+  const el = document.getElementById('savedPill');
+  el.className = '';
+  if (cls) el.classList.add(cls);
+  el.textContent = text;
+}
+
+/* ────────────────────────────────────────
+   Syntax highlight  (JS/TS-flavoured)
+──────────────────────────────────────── */
+function applyHighlight(text) {
+  if (!editorInst) return;
+  const spans = [];
+
+  const push = (re, color, style) => {
+    re.lastIndex = 0;
+    let m;
+    while ((m = re.exec(text)) !== null) {
+      spans.push({ from: m.index, to: m.index + m[0].length, color, style: style || null });
+    }
+  };
+
+  // Block comments first (highest priority — we'll sort by from later)
+  push(/\/\*[\s\S]*?\*\//g,   HL.comment, 'font-style:italic');
+
+  // Line comments
+  push(/\/\/.*/g,              HL.comment, 'font-style:italic');
+
+  // Template strings
+  push(/`[^`]*`/gs,            HL.string,  null);
+
+  // Regular strings
+  push(/"(?:[^"\\]|\\.)*"/g,  HL.string,  null);
+  push(/'(?:[^'\\]|\\.)*'/g,  HL.string,  null);
+
+  // Keywords
+  const KW = /\b(import|export|from|default|as|const|let|var|function|class|extends|return|if|else|for|while|do|switch|case|break|continue|new|this|super|typeof|instanceof|in|of|async|await|try|catch|finally|throw|void|delete|yield|static|get|set|abstract|interface|type|enum|implements|declare|namespace|module|true|false|null|undefined|NaN|Infinity)\b/g;
+  push(KW,                     HL.keyword, null);
+
+  // Numbers
+  push(/\b\d+\.?\d*(?:[eE][+-]?\d+)?\b|0x[0-9a-fA-F]+\b/g, HL.number, null);
+
+  // Class names (PascalCase)
+  push(/\b([A-Z][a-zA-Z0-9]*)\b/g, HL.cls, null);
+
+  // Function calls
+  push(/\b([a-z_$][a-zA-Z0-9_$]*)\s*(?=\()/g, HL.fn, null);
+
+  // Decorators
+  push(/@[a-zA-Z_$][a-zA-Z0-9_$.]*\b/g, HL.attr, null);
+
+  // Operators
+  push(/=>|===|!==|<=|>=|&&|\|\||[+\-*/%=<>!&|^~?:]/g, HL.op, null);
+
+  // HTML tags (basic)
+  push(/<\/?[a-zA-Z][a-zA-Z0-9-]*(?:\s[^>]*)?\/?>/g, HL.tag, null);
+
+  editorInst.highlight(spans);
+}
+
+/* ────────────────────────────────────────
+   Find
+──────────────────────────────────────── */
+function toggleFind() {
+  findOpen = !findOpen;
+  document.getElementById('findbar').classList.toggle('open', findOpen);
+  document.getElementById('btnFind').classList.toggle('on', findOpen);
+  if (findOpen) {
+    setTimeout(() => document.getElementById('findInput').focus(), 60);
+  } else {
+    closeFind();
+  }
+}
+
+function closeFind() {
+  findOpen = false;
+  document.getElementById('findbar').classList.remove('open');
+  document.getElementById('btnFind').classList.remove('on');
+  document.getElementById('findInput').value = '';
+  findMatches = []; findIdx = -1;
+  document.getElementById('findCount').textContent = '—';
+  // clear find highlights
+  if (hlOn && editorInst) applyHighlight(editorInst.getText());
+  else if (editorInst) editorInst.clearHighlights();
+  if (editorInst) editorInst.focus();
+}
+
+function doFind() {
+  if (!editorInst) return;
+  const q = document.getElementById('findInput').value;
+  const text = editorInst.getText();
+  findMatches = [];
+  findIdx = -1;
+
+  if (q.length < 1) {
+    document.getElementById('findCount').textContent = '—';
+    if (hlOn) applyHighlight(text);
+    return;
+  }
+
+  // case-insensitive search
+  const lower  = text.toLowerCase();
+  const qLower = q.toLowerCase();
+  let pos = 0;
+  while (true) {
+    const idx = lower.indexOf(qLower, pos);
+    if (idx === -1) break;
+    findMatches.push(idx);
+    pos = idx + 1;
+  }
+
+  document.getElementById('findCount').textContent =
+    findMatches.length ? `1/${findMatches.length}` : '0';
+
+  // highlight matches + base syntax
+  const baseHL = [];
+  if (hlOn) {
+    // collect base HL separately to merge
+    editorInst.clearHighlights();
+    applyHighlight(text);
+  }
+
+  // paint matches over with yellow
+  const matchHL = findMatches.map(i => ({
+    from: i, to: i + q.length,
+    color: '#000',
+    style: `background:${HL.number};border-radius:2px;`
+  }));
+  // merge with current highlights
+  const currentHL = editorInst._highlights || [];
+  editorInst.highlight([...currentHL, ...matchHL]);
+
+  if (findMatches.length) {
+    findIdx = 0;
+    jumpToMatch(0);
+  }
+}
+
+function findStep(dir) {
+  if (!findMatches.length) return;
+  findIdx = (findIdx + dir + findMatches.length) % findMatches.length;
+  jumpToMatch(findIdx);
+  document.getElementById('findCount').textContent = `${findIdx+1}/${findMatches.length}`;
+}
+
+function jumpToMatch(i) {
+  const pos = findMatches[i];
+  if (pos === undefined || !editorInst) return;
+  const lc = editorInst.offsetToPosition(pos);
+  editorInst.scrollToLine(lc.line, 'center');
+  editorInst.setSelection(pos, pos + document.getElementById('findInput').value.length);
+}
+
+function findKey(e) {
+  if (e.key === 'Enter')  { e.shiftKey ? findStep(-1) : findStep(1); return; }
+  if (e.key === 'Escape') { closeFind(); return; }
+}
+
+/* ────────────────────────────────────────
+   Toolbar toggles
+──────────────────────────────────────── */
+function toggleQtbar() {
+  qtOpen = !qtOpen;
+  document.getElementById('qtbar').classList.toggle('hidden', !qtOpen);
+  document.getElementById('btnQT').classList.toggle('on', qtOpen);
+}
+
+function toggleHL() {
+  hlOn = !hlOn;
+  document.getElementById('qtHL').classList.toggle('on', hlOn);
+  if (hlOn) applyHighlight(editorInst.getText());
+  else editorInst.clearHighlights();
+  toast(hlOn ? 'Syntax highlight ON' : 'Syntax highlight OFF');
+}
+
+function toggleLN() {
+  lnOn = !lnOn;
+  document.getElementById('qtLN').classList.toggle('on', lnOn);
+  editorInst.enableLineNumber(lnOn);
+  toast(lnOn ? 'Line numbers ON' : 'Line numbers OFF');
+}
+
+function toggleWrap() {
+  wrapOn = !wrapOn;
+  document.getElementById('qtWrap').classList.toggle('on', wrapOn);
+  document.getElementById('editorMount').classList.toggle('wrap', wrapOn);
+  toast(wrapOn ? 'Word wrap ON' : 'Word wrap OFF');
+}
+
+function copyAll() {
+  if (!editorInst) return;
+  navigator.clipboard.writeText(editorInst.getText())
+    .then(() => toast('Copied to clipboard ✓'))
+    .catch(() => toast('Copy failed'));
+}
+
+/* ────────────────────────────────────────
+   Insertion helpers
+──────────────────────────────────────── */
+function ins(text) {
+  if (!editorInst) return;
+  editorInst.addText({ text });
+  editorInst.focus();
+}
+
+function wrap(open, close) {
+  if (!editorInst) return;
+  const sel = editorInst.getSelection();
+  if (sel.from === sel.to) {
+    editorInst.addText({ text: open + close, from: sel.from, to: sel.to });
+    editorInst.setCursor(sel.from + open.length);
+  } else {
+    editorInst.addText({ text: open + sel.text + close, from: sel.from, to: sel.to });
+    editorInst.setSelection(sel.from + open.length, sel.from + open.length + sel.text.length);
+  }
+  editorInst.focus();
+}
+
+/* ────────────────────────────────────────
+   New doc
+──────────────────────────────────────── */
+function newDoc() {
+  if (isDirty) {
+    if (!confirm('Discard unsaved changes?')) return;
+  }
+  editorInst.setText('');
+  document.getElementById('titleInput').value = '';
+  localStorage.removeItem(STORAGE);
+  localStorage.removeItem(STORAGE_TITLE);
+  isDirty = false;
+  setSavedPill('', '—');
+  editorInst.focus();
+  toast('New document');
+}
+
+/* ────────────────────────────────────────
+   Mobile
+──────────────────────────────────────── */
+function isMobile() {
+  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+      || window.innerWidth < 600;
+}
+
+function showKbrow(v) {
+  document.getElementById('kbrow').classList.toggle('visible', v);
+}
+
+/* ────────────────────────────────────────
+   Keyboard shortcuts
+──────────────────────────────────────── */
+function onGlobalKey(e) {
+  const ctrl = e.ctrlKey || e.metaKey;
+  if (ctrl && e.key === 's') {
+    e.preventDefault(); autosave(); toast('Saved ✓');
+  }
+  if (ctrl && e.key === 'f') {
+    e.preventDefault(); toggleFind();
+  }
+  if (ctrl && e.key === 'n') {
+    e.preventDefault(); newDoc();
+  }
+  if (e.key === 'Escape') {
+    if (findOpen) closeFind();
+  }
+}
+
+/* ────────────────────────────────────────
+   Toast
+──────────────────────────────────────── */
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+class AutoComplete {
+  constructor(options = {}) {
+    this.items = [];
+    this.visible = false;
+
+    // Root container
+    this.root = document.createElement("div");
+    this.root.style.position = "fixed";
+    this.root.style.zIndex = "9999";
+    this.root.style.background = "#1e1e1e";
+    this.root.style.border = "1px solid #333";
+    this.root.style.borderRadius = "6px";
+    this.root.style.boxShadow = "0 8px 20px rgba(0,0,0,0.4)";
+    this.root.style.minWidth = "160px";
+    this.root.style.display = "none";
+    this.root.style.overflow = "hidden";
+
+    // List
+    this.list = document.createElement("ul");
+    this.list.style.listStyle = "none";
+    this.list.style.padding = "4px 0";
+    this.list.style.margin = "0";
+
+    this.root.appendChild(this.list);
+    document.body.appendChild(this.root);
+  }
+
+  setItems(items = []) {
+    this.items = items;
+    this._render();
+  }
+
+  _render() {
+    this.list.innerHTML = "";
+
+    this.items.forEach((item) => {
+      const li = document.createElement("li");
+      li.textContent = item.label;
+
+      li.style.padding = "6px 12px";
+      li.style.cursor = "pointer";
+      li.style.color = "#ddd";
+      li.style.fontSize = "14px";
+
+      li.addEventListener("mouseenter", () => {
+        li.style.background = "#2a2a2a";
+      });
+
+      li.addEventListener("mouseleave", () => {
+        li.style.background = "transparent";
+      });
+
+      li.addEventListener("click", () => {
+        if (typeof item.onSelect === "function") {
+          item.onSelect(item);
+        }
+        this.hide();
+      });
+
+      this.list.appendChild(li);
+    });
+  }
+
+  summon(x, y) {
+    this.root.style.display = "block";
+    this.root.style.left = x + "px";
+    this.root.style.top = y + "px";
+
+    this.visible = true;
+
+    this._keepInViewport();
+  }
+
+  hide() {
+    this.root.style.display = "none";
+    this.visible = false;
+  }
+
+  destroy() {
+    this.root.remove();
+  }
+
+  _keepInViewport() {
+    const rect = this.root.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    let newX = rect.left;
+    let newY = rect.top;
+
+    if (rect.right > vw) {
+      newX = vw - rect.width - 8;
+    }
+
+    if (rect.bottom > vh) {
+      newY = vh - rect.height - 8;
+    }
+
+    if (newX < 8) newX = 8;
+    if (newY < 8) newY = 8;
+
+    this.root.style.left = newX + "px";
+    this.root.style.top = newY + "px";
+  }
+}
+const ac = new AutoComplete();
+
+ac.setItems([
+  {
+    label: "console.log",
+    onSelect: (item) => {
+      console.log("Dipilih:", item.label);
+    }
+  },
+  {
+    label: "function",
+    onSelect: () => {
+      alert("Function selected!");
+    }
+  }
+]);
+
+document.addEventListener("contextmenu", (e) => {
+  e.preventDefault();
+  ac.summon(e.clientX, e.clientY);
+});
+</script>
+</body>
+</html>
